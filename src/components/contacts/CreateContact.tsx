@@ -7,6 +7,8 @@ interface CreateContactProps {
   client: Client;
   persons: Person[];
   agents: Agent[];
+  initialType?: ContactType;
+  forceType?: boolean;
   onBack: () => void;
   onCreate: (contact: Contact) => void;
 }
@@ -15,10 +17,12 @@ export default function CreateContact({
   client,
   persons,
   agents,
+  initialType = 'spontane',
+  forceType = false,
   onBack,
   onCreate
 }: CreateContactProps) {
-  const [type, setType] = useState<ContactType>('spontane');
+  const [type, setType] = useState<ContactType>(initialType);
   const [modality, setModality] = useState<ContactModality>('telephone');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -98,12 +102,14 @@ export default function CreateContact({
             <div className="grid grid-cols-3 gap-4">
               <button
                 type="button"
-                onClick={() => setType('spontane')}
-                className={`p-4 border-2 rounded-lg transition-all ${
-                  type === 'spontane'
+                onClick={() => !forceType && setType('spontane')}
+                disabled={forceType}
+                className={`p-4 border-2 rounded-lg transition-all ${type === 'spontane'
                     ? 'border-blue-600 bg-blue-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
-                }`}
+                    : forceType
+                      ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
+                      : 'border-neutral-200 hover:border-neutral-300'
+                  }`}
               >
                 <div className="text-center">
                   <p className="text-neutral-900">Spontané</p>
@@ -112,12 +118,14 @@ export default function CreateContact({
               </button>
               <button
                 type="button"
-                onClick={() => setType('commercial')}
-                className={`p-4 border-2 rounded-lg transition-all ${
-                  type === 'commercial'
+                onClick={() => !forceType && setType('commercial')}
+                disabled={forceType}
+                className={`p-4 border-2 rounded-lg transition-all ${type === 'commercial'
                     ? 'border-blue-600 bg-blue-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
-                }`}
+                    : forceType
+                      ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
+                      : 'border-neutral-200 hover:border-neutral-300'
+                  }`}
               >
                 <div className="text-center">
                   <p className="text-neutral-900">Commercial</p>
@@ -126,12 +134,14 @@ export default function CreateContact({
               </button>
               <button
                 type="button"
-                onClick={() => setType('entretien')}
-                className={`p-4 border-2 rounded-lg transition-all ${
-                  type === 'entretien'
+                onClick={() => !forceType && setType('entretien')}
+                disabled={forceType}
+                className={`p-4 border-2 rounded-lg transition-all ${type === 'entretien'
                     ? 'border-blue-600 bg-blue-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
-                }`}
+                    : forceType
+                      ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
+                      : 'border-neutral-200 hover:border-neutral-300'
+                  }`}
               >
                 <div className="text-center">
                   <p className="text-neutral-900">Entretien</p>
@@ -148,33 +158,30 @@ export default function CreateContact({
               <button
                 type="button"
                 onClick={() => setModality('sur_place')}
-                className={`p-4 border-2 rounded-lg transition-all ${
-                  modality === 'sur_place'
+                className={`p-4 border-2 rounded-lg transition-all ${modality === 'sur_place'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-neutral-200 hover:border-neutral-300'
-                }`}
+                  }`}
               >
                 <p className="text-neutral-900 text-center">Sur place</p>
               </button>
               <button
                 type="button"
                 onClick={() => setModality('telephone')}
-                className={`p-4 border-2 rounded-lg transition-all ${
-                  modality === 'telephone'
+                className={`p-4 border-2 rounded-lg transition-all ${modality === 'telephone'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-neutral-200 hover:border-neutral-300'
-                }`}
+                  }`}
               >
                 <p className="text-neutral-900 text-center">Téléphone</p>
               </button>
               <button
                 type="button"
                 onClick={() => setModality('mail')}
-                className={`p-4 border-2 rounded-lg transition-all ${
-                  modality === 'mail'
+                className={`p-4 border-2 rounded-lg transition-all ${modality === 'mail'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-neutral-200 hover:border-neutral-300'
-                }`}
+                  }`}
               >
                 <p className="text-neutral-900 text-center">Mail</p>
               </button>

@@ -9,9 +9,10 @@ import SubscriptionDetails from './components/subscriptions/SubscriptionDetails'
 import ContactsList from './components/contacts/ContactsList';
 import CreateContact from './components/contacts/CreateContact';
 import ContactDetails from './components/contacts/ContactDetails';
+import CreateProposal from './components/contacts/CreateProposal';
 import { Person, Client } from './types';
 import { Subscription } from './types/subscription';
-import { Contact } from './types/contact';
+import { Contact, Proposal, ContactType } from './types/contact';
 import { mockDomains, mockContracts, mockSubscriptions } from './data/mockSubscriptions';
 import { mockAgents, mockContacts } from './data/mockContacts';
 import { mockClients } from './data/mockClients';
@@ -176,7 +177,7 @@ const initialAllPersons: Person[] = [
   }
 ];
 
-type View = 'client-search' | 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact' | 'contact-details';
+type View = 'client-search' | 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact' | 'contact-details' | 'create-proposal';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('client-search');
@@ -194,6 +195,8 @@ export default function App() {
   // Contacts state
   const [contacts, setContacts] = useState<Contact[]>(mockContacts);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [createContactInitialType, setCreateContactInitialType] = useState<ContactType | undefined>(undefined);
+  const [createContactForceType, setCreateContactForceType] = useState(false);
 
   const handleSelectClient = (client: Client) => {
     setSelectedClient(client);
@@ -322,6 +325,14 @@ export default function App() {
   };
 
   const handleCreateContact = () => {
+    setCreateContactInitialType('spontane'); // Default
+    setCreateContactForceType(false);
+    setCurrentView('create-contact');
+  };
+
+  const handlePlanInterview = () => {
+    setCreateContactInitialType('entretien');
+    setCreateContactForceType(true);
     setCurrentView('create-contact');
   };
 
@@ -340,6 +351,27 @@ export default function App() {
       prev.map(c => (c.id === updatedContact.id ? updatedContact : c))
     );
     setSelectedContact(updatedContact);
+  };
+
+  const handleRealizeInterview = () => {
+    setCurrentView('create-proposal');
+  };
+
+  const handleCreateProposal = (proposals: Proposal[]) => {
+    if (selectedContact) {
+      const updatedContact: Contact = {
+        ...selectedContact,
+        status: 'realise',
+        proposals: proposals,
+        lastModifiedDate: new Date().toISOString()
+      };
+      handleUpdateContact(updatedContact);
+    }
+    setCurrentView('contact-details');
+  };
+
+  const handleBackToContactDetails = () => {
+    setCurrentView('contact-details');
   };
 
   return (
@@ -446,6 +478,8 @@ export default function App() {
           client={selectedClient}
           persons={clientPersons}
           agents={mockAgents}
+          initialType={createContactInitialType}
+          forceType={createContactForceType}
           onBack={handleBackToContactsList}
           onCreate={handleSaveContact}
         />
@@ -458,6 +492,16 @@ export default function App() {
           agents={mockAgents}
           onBack={handleBackToContactsList}
           onUpdate={handleUpdateContact}
+          onPlanInterview={handlePlanInterview}
+          onRealizeInterview={handleRealizeInterview}
+        />
+      )}
+
+      {currentView === 'create-proposal' && selectedClient && (
+        <CreateProposal
+          client={selectedClient}
+          onBack={handleBackToContactDetails}
+          onCreate={handleCreateProposal}
         />
       )}
     </div>

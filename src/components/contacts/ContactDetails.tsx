@@ -9,6 +9,8 @@ interface ContactDetailsProps {
   agents: Agent[];
   onBack: () => void;
   onUpdate: (updatedContact: Contact) => void;
+  onPlanInterview: () => void;
+  onRealizeInterview: () => void;
 }
 
 export default function ContactDetails({
@@ -16,7 +18,9 @@ export default function ContactDetails({
   persons,
   agents,
   onBack,
-  onUpdate
+  onUpdate,
+  onPlanInterview,
+  onRealizeInterview
 }: ContactDetailsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContact, setEditedContact] = useState<Contact>(contact);
@@ -28,8 +32,8 @@ export default function ContactDetails({
 
   const handleSave = () => {
     onUpdate({
-        ...editedContact,
-        lastModifiedDate: new Date().toISOString()
+      ...editedContact,
+      lastModifiedDate: new Date().toISOString()
     });
     setIsEditing(false);
   };
@@ -50,9 +54,7 @@ export default function ContactDetails({
   };
 
   const handleRealizeInterview = () => {
-    // Placeholder for future implementation
-    console.log('Réaliser l\'entretien clicked');
-    alert('Fonctionnalité à venir : Réaliser l\'entretien');
+    onRealizeInterview();
   };
 
   const getStatusColor = (status: ContactStatus) => {
@@ -107,21 +109,37 @@ export default function ContactDetails({
                 {contact.type}
               </span>
             </div>
-            
+
             <div className="flex gap-3">
               {!isEditing && (
                 <>
-                   {isEntretien && contact.status === 'planifie' && (
+                  <button
+                    onClick={onPlanInterview}
+                    className="px-4 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Planifier un entretien
+                  </button>
+
+                  {isEntretien && (
                     <>
                       <button
                         onClick={handleCancelInterview}
-                        className="px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium"
+                        disabled={contact.status === 'realise' || contact.status === 'annule'}
+                        className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${contact.status === 'realise' || contact.status === 'annule'
+                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                            : 'text-red-600 bg-red-50 hover:bg-red-100'
+                          }`}
                       >
                         Annuler l'entretien
                       </button>
                       <button
                         onClick={handleRealizeInterview}
-                        className="px-4 py-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        disabled={contact.status === 'realise' || contact.status === 'annule'}
+                        className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${contact.status === 'realise' || contact.status === 'annule'
+                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                            : 'text-white bg-green-600 hover:bg-green-700'
+                          }`}
                       >
                         <CheckCircle className="w-4 h-4" />
                         Réaliser l'entretien
@@ -174,7 +192,7 @@ export default function ContactDetails({
                     <p className="text-neutral-900">{contact.motif}</p>
                   )}
                 </div>
-                
+
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
                   {isEditing ? (
@@ -191,120 +209,119 @@ export default function ContactDetails({
               </div>
             </section>
 
-             {/* Specific Entretien Info - Only editable if Entretien type */}
+            {/* Specific Entretien Info - Only editable if Entretien type */}
             <section className="space-y-4">
               <h3 className="text-lg font-medium text-neutral-900 border-b border-neutral-100 pb-2">Détails de l'échange</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                   <label className="block text-sm font-medium text-neutral-700 mb-1">Date</label>
-                   {isEditing && isEntretien ? (
-                     <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                        <input
-                            type="datetime-local"
-                            className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            value={editedContact.date}
-                            onChange={(e) => setEditedContact({ ...editedContact, date: e.target.value })}
-                        />
-                     </div>
-                   ) : (
-                     <div className="flex items-center gap-2 text-neutral-900">
-                       <Calendar className="w-4 h-4 text-neutral-500" />
-                       {new Date(contact.date).toLocaleString('fr-FR')}
-                     </div>
-                   )}
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Date</label>
+                  {isEditing && isEntretien ? (
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                      <input
+                        type="datetime-local"
+                        className="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={editedContact.date}
+                        onChange={(e) => setEditedContact({ ...editedContact, date: e.target.value })}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-neutral-900">
+                      <Calendar className="w-4 h-4 text-neutral-500" />
+                      {new Date(contact.date).toLocaleString('fr-FR')}
+                    </div>
+                  )}
                 </div>
 
                 <div>
-                   <label className="block text-sm font-medium text-neutral-700 mb-1">Modalité</label>
-                   {isEditing && isEntretien ? (
-                     <select
-                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={editedContact.modality}
-                        onChange={(e) => setEditedContact({ ...editedContact, modality: e.target.value as ContactModality })}
-                     >
-                       <option value="telephone">Téléphone</option>
-                       <option value="mail">Mail</option>
-                       <option value="sur_place">Sur place</option>
-                     </select>
-                   ) : (
-                     <div className="flex items-center gap-2 text-neutral-900">
-                        {contact.modality === 'telephone' && <Phone className="w-4 h-4 text-neutral-500" />}
-                        {contact.modality === 'mail' && <Mail className="w-4 h-4 text-neutral-500" />}
-                        {contact.modality === 'sur_place' && <MapPin className="w-4 h-4 text-neutral-500" />}
-                        <span className="capitalize">{contact.modality.replace('_', ' ')}</span>
-                     </div>
-                   )}
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Modalité</label>
+                  {isEditing && isEntretien ? (
+                    <select
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={editedContact.modality}
+                      onChange={(e) => setEditedContact({ ...editedContact, modality: e.target.value as ContactModality })}
+                    >
+                      <option value="telephone">Téléphone</option>
+                      <option value="mail">Mail</option>
+                      <option value="sur_place">Sur place</option>
+                    </select>
+                  ) : (
+                    <div className="flex items-center gap-2 text-neutral-900">
+                      {contact.modality === 'telephone' && <Phone className="w-4 h-4 text-neutral-500" />}
+                      {contact.modality === 'mail' && <Mail className="w-4 h-4 text-neutral-500" />}
+                      {contact.modality === 'sur_place' && <MapPin className="w-4 h-4 text-neutral-500" />}
+                      <span className="capitalize">{contact.modality.replace('_', ' ')}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">Agent</label>
-                    {isEditing && isEntretien ? (
-                        <select
-                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            value={editedContact.agentId}
-                            onChange={(e) => {
-                                const agent = agents.find(a => a.id === e.target.value);
-                                if (agent) {
-                                    setEditedContact({
-                                        ...editedContact,
-                                        agentId: agent.id,
-                                        agentName: agent.name
-                                    });
-                                }
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Agent</label>
+                  {isEditing && isEntretien ? (
+                    <select
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={editedContact.agentId}
+                      onChange={(e) => {
+                        const agent = agents.find(a => a.id === e.target.value);
+                        if (agent) {
+                          setEditedContact({
+                            ...editedContact,
+                            agentId: agent.id,
+                            agentName: agent.name
+                          });
+                        }
+                      }}
+                    >
+                      {agents.map(agent => (
+                        <option key={agent.id} value={agent.id}>{agent.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="flex items-center gap-2 text-neutral-900">
+                      <User className="w-4 h-4 text-neutral-500" />
+                      {contact.agentName}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Personnes impliquées</label>
+                  {isEditing && isEntretien ? (
+                    <div className="flex flex-wrap gap-2">
+                      {persons.map(person => {
+                        const isSelected = editedContact.personIds.includes(person.id);
+                        return (
+                          <button
+                            key={person.id}
+                            onClick={() => {
+                              const newIds = isSelected
+                                ? editedContact.personIds.filter(id => id !== person.id)
+                                : [...editedContact.personIds, person.id];
+                              setEditedContact({ ...editedContact, personIds: newIds });
                             }}
-                        >
-                            {agents.map(agent => (
-                                <option key={agent.id} value={agent.id}>{agent.name}</option>
-                            ))}
-                        </select>
-                    ) : (
-                        <div className="flex items-center gap-2 text-neutral-900">
-                            <User className="w-4 h-4 text-neutral-500" />
-                            {contact.agentName}
-                        </div>
-                    )}
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">Personnes impliquées</label>
-                     {isEditing && isEntretien ? (
-                         <div className="flex flex-wrap gap-2">
-                             {persons.map(person => {
-                                 const isSelected = editedContact.personIds.includes(person.id);
-                                 return (
-                                     <button
-                                         key={person.id}
-                                         onClick={() => {
-                                             const newIds = isSelected
-                                                 ? editedContact.personIds.filter(id => id !== person.id)
-                                                 : [...editedContact.personIds, person.id];
-                                             setEditedContact({ ...editedContact, personIds: newIds });
-                                         }}
-                                         className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                                             isSelected
-                                                 ? 'bg-blue-100 border-blue-200 text-blue-700'
-                                                 : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
-                                         }`}
-                                     >
-                                         {person.firstName} {person.lastName}
-                                     </button>
-                                 );
-                             })}
-                         </div>
-                     ) : (
-                         <div className="flex flex-wrap gap-2">
-                             {contact.personIds.map(id => {
-                                 const person = persons.find(p => p.id === id);
-                                 return person ? (
-                                     <span key={id} className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-sm">
-                                         {person.firstName} {person.lastName}
-                                     </span>
-                                 ) : null;
-                             })}
-                             {contact.personIds.length === 0 && <span className="text-neutral-400 italic">Aucune personne impliquée</span>}
-                         </div>
-                     )}
+                            className={`px-3 py-1 rounded-full text-sm border transition-colors ${isSelected
+                                ? 'bg-blue-100 border-blue-200 text-blue-700'
+                                : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                              }`}
+                          >
+                            {person.firstName} {person.lastName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {contact.personIds.map(id => {
+                        const person = persons.find(p => p.id === id);
+                        return person ? (
+                          <span key={id} className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-sm">
+                            {person.firstName} {person.lastName}
+                          </span>
+                        ) : null;
+                      })}
+                      {contact.personIds.length === 0 && <span className="text-neutral-400 italic">Aucune personne impliquée</span>}
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
