@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ClientSearch from './components/ClientSearch';
 import Client360 from './components/Client360';
 import ClientDetails from './components/ClientDetails';
 import PersonDetails from './components/PersonDetails';
@@ -15,11 +16,48 @@ import { mockDomains, mockContracts, mockSubscriptions } from './data/mockSubscr
 import { mockAgents, mockContacts } from './data/mockContacts';
 import { mockClients } from './data/mockClients';
 
-// Données mockées
+// Données mockées pour ACME standard (fallback if needed)
 const mockClient: Client = {
   id: 'CLI-001',
   name: 'Acme Corporation',
-  status: 'Active'
+  status: 'Active',
+  address: {
+    street: '123 Avenue de l\'Innovation',
+    postalCode: '75001',
+    city: 'Paris',
+    country: 'France'
+  },
+  agency: 'Agence Paris Centre',
+  advisor: 'Thomas Martin',
+  segment: 'Grand Compte',
+  scores: {
+    quotation: 85,
+    risk: 'Faible',
+    potential: 'Élevé',
+    reciprocity: 12
+  },
+  relationship: {
+    nextContactDate: '2024-03-15',
+    nextContactPerson: 'Jean Dupont',
+    lastContactDate: '2024-02-01',
+    preferredContactMethod: 'Email'
+  },
+  interactions: [
+    {
+      id: 'INT-001',
+      date: '2024-02-01',
+      type: 'Rendez-vous',
+      notes: 'Point annuel sur les contrats',
+      agent: 'Thomas Martin'
+    },
+    {
+      id: 'INT-002',
+      date: '2023-11-15',
+      type: 'Appel',
+      notes: 'Proposition nouvelle assurance flotte',
+      agent: 'Sophie Durand'
+    }
+  ]
 };
 
 const mockPersons: Person[] = [
@@ -138,11 +176,11 @@ const initialAllPersons: Person[] = [
   }
 ];
 
-type View = 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact' | 'contact-details';
+type View = 'client-search' | 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact' | 'contact-details';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<View>('client-360');
-  const [selectedClient, setSelectedClient] = useState<Client | null>(mockClient);
+  const [currentView, setCurrentView] = useState<View>('client-search');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientPersons, setClientPersons] = useState<Person[]>(mockPersons);
   const [allPersons, setAllPersons] = useState<Person[]>(initialAllPersons);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
@@ -156,6 +194,13 @@ export default function App() {
   // Contacts state
   const [contacts, setContacts] = useState<Contact[]>(mockContacts);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+
+  const handleSelectClient = (client: Client) => {
+    setSelectedClient(client);
+    // In a real app we would fetch persons for this client here
+    // For Mocks, we just keep mockPersons "assigned" to generic view
+    setCurrentView('client-360');
+  };
 
   const handleViewPerson = (person: Person, fromAddModal: boolean = false) => {
     setSelectedPerson(person);
@@ -299,13 +344,33 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {currentView === 'client-360' && selectedClient && (
-        <Client360
-          client={selectedClient}
-          onViewDetails={() => setCurrentView('client-details')}
-          onViewSubscriptions={handleViewSubscriptions}
-          onViewContacts={handleViewContacts}
+
+      {currentView === 'client-search' && (
+        <ClientSearch
+          clients={mockClients} // Using imported mockClients which should have ACME enriched
+          persons={initialAllPersons}
+          onSelectClient={handleSelectClient}
         />
+      )}
+
+      {currentView === 'client-360' && selectedClient && (
+        <div className="relative">
+          <button
+            onClick={() => setCurrentView('client-search')}
+            className="absolute top-6 left-6 z-20 text-sm bg-white/80 backdrop-blur px-3 py-1 rounded-full border border-neutral-200 text-neutral-500 hover:text-blue-600 hover:border-blue-300 transition-colors"
+            style={{ position: 'fixed', top: '1rem', right: '1rem', left: 'auto' }} // Corner
+          >
+            Retour Recherche
+          </button>
+          <Client360
+            client={selectedClient}
+            persons={clientPersons}
+            subscriptions={subscriptions}
+            onViewDetails={() => setCurrentView('client-details')}
+            onViewSubscriptions={handleViewSubscriptions}
+            onViewContacts={handleViewContacts}
+          />
+        </div>
       )}
 
       {currentView === 'client-details' && selectedClient && (

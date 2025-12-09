@@ -34,8 +34,33 @@ export interface Person {
   role?: string;
 }
 
+export interface Interaction {
+  id: string;
+  date: string;
+  type: string;
+  notes: string;
+  agent: string;
+}
+
 export interface Client {
   id: string;
   name: string;
   status: string;
+  address: Address;
+  agency: string;
+  advisor: string;
+  segment: string;
+  scores: {
+    quotation: number;
+    risk: 'Faible' | 'Moyen' | 'Élevé';
+    potential: 'Faible' | 'Moyen' | 'Élevé';
+    reciprocity: number;
+  };
+  relationship: {
+    nextContactDate?: string;
+    nextContactPerson?: string;
+    lastContactDate?: string;
+    preferredContactMethod: string;
+  };
+  interactions: Interaction[];
 }
