@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, X, Calendar, User, Phone, Mail, MapPin, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, X, Calendar, User, Phone, Mail, MapPin, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { Contact, ContactModality, ContactStatus } from '../../types/contact';
 import { Person, Agent } from '../../types';
 
@@ -98,6 +98,52 @@ export default function ContactDetails({
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Informations */}
+        <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+            <Info className="w-5 h-5 text-blue-600" />
+            Informations
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-500 mb-1">Motif</label>
+              <p className="text-neutral-900">{contact.motif}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-500 mb-1">Description</label>
+              <p className="text-neutral-900 whitespace-pre-wrap">{contact.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Propositions faites (if realised) */}
+        {contact.status === 'realise' && contact.proposals && contact.proposals.length > 0 && (
+          <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              Propositions effectuées
+            </h2>
+            <div className="space-y-3">
+              {contact.proposals.map((proposal) => (
+                <div key={proposal.id} className="p-4 rounded-lg bg-neutral-50 border border-neutral-100 flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-neutral-900">{proposal.itemName}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${proposal.type === 'contrat' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                        }`}>
+                        {proposal.type}
+                      </span>
+                    </div>
+                    {proposal.annotation && (
+                      <p className="text-sm text-neutral-600">{proposal.annotation}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
           {/* Header Actions */}
           <div className="p-6 border-b border-neutral-200 flex justify-between items-center bg-neutral-50/50">
@@ -110,7 +156,7 @@ export default function ContactDetails({
               </span>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-4"> {/* Increased gap from gap-3 to gap-4 */}
               {!isEditing && (
                 <>
                   <button
@@ -127,8 +173,8 @@ export default function ContactDetails({
                         onClick={handleCancelInterview}
                         disabled={contact.status === 'realise' || contact.status === 'annule'}
                         className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${contact.status === 'realise' || contact.status === 'annule'
-                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                            : 'text-red-600 bg-red-50 hover:bg-red-100'
+                          ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                          : 'text-red-600 bg-red-50 hover:bg-red-100'
                           }`}
                       >
                         Annuler l'entretien
@@ -137,8 +183,8 @@ export default function ContactDetails({
                         onClick={handleRealizeInterview}
                         disabled={contact.status === 'realise' || contact.status === 'annule'}
                         className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${contact.status === 'realise' || contact.status === 'annule'
-                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                            : 'text-white bg-green-600 hover:bg-green-700'
+                          ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                          : 'text-white bg-green-600 hover:bg-green-700'
                           }`}
                       >
                         <CheckCircle className="w-4 h-4" />
@@ -300,8 +346,8 @@ export default function ContactDetails({
                               setEditedContact({ ...editedContact, personIds: newIds });
                             }}
                             className={`px-3 py-1 rounded-full text-sm border transition-colors ${isSelected
-                                ? 'bg-blue-100 border-blue-200 text-blue-700'
-                                : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                              ? 'bg-blue-100 border-blue-200 text-blue-700'
+                              : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                               }`}
                           >
                             {person.firstName} {person.lastName}

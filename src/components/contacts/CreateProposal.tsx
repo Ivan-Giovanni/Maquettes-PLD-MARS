@@ -16,6 +16,14 @@ const CONTRACT_CATEGORIES = [
     'Surveillance'
 ];
 
+const PRODUCT_CATEGORIES = [
+    'Livret A',
+    'Assurance Vie',
+    'PEL',
+    'PER',
+    'Compte Titres'
+];
+
 export default function CreateProposal({
     client,
     onBack,
@@ -25,16 +33,18 @@ export default function CreateProposal({
 
     // Form State
     const [proposalType, setProposalType] = useState<ProposalType>('contrat');
-    const [selectedCategory, setSelectedCategory] = useState(CONTRACT_CATEGORIES[0]);
+    const [selectedContractCategory, setSelectedContractCategory] = useState(CONTRACT_CATEGORIES[0]);
+    const [selectedProductCategory, setSelectedProductCategory] = useState(PRODUCT_CATEGORIES[0]);
     const [description, setDescription] = useState('');
 
     const handleAddProposal = () => {
+        const itemName = proposalType === 'contrat' ? selectedContractCategory : selectedProductCategory;
+
         const newProposal: Proposal = {
             id: `PROP-${Date.now()}`,
             type: proposalType,
             itemId: `ITEM-${Date.now()}`,
-            itemName: proposalType === 'contrat' ? selectedCategory : 'Produit',
-            // itemPrice removed as requested
+            itemName: itemName,
             annotation: description,
             createdDate: new Date().toISOString()
         };
@@ -43,9 +53,7 @@ export default function CreateProposal({
 
         // Reset form
         setDescription('');
-        if (proposalType === 'contrat') {
-            setSelectedCategory(CONTRACT_CATEGORIES[0]);
-        }
+        // Keep category selection as is for convenience
     };
 
     const handleRemoveProposal = (id: string) => {
@@ -106,8 +114,11 @@ export default function CreateProposal({
                                         </button>
                                         <button
                                             type="button"
-                                            disabled
-                                            className="flex-1 p-3 border border-neutral-100 rounded-lg flex items-center justify-center gap-2 bg-neutral-50 text-neutral-400 cursor-not-allowed"
+                                            onClick={() => setProposalType('produit')}
+                                            className={`flex-1 p-3 border rounded-lg flex items-center justify-center gap-2 transition-all ${proposalType === 'produit'
+                                                    ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                    : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                                                }`}
                                         >
                                             <ShoppingBag className="w-4 h-4" />
                                             Produit
@@ -115,18 +126,36 @@ export default function CreateProposal({
                                     </div>
                                 </div>
 
-                                {/* Catégorie */}
+                                {/* Catégorie Contrat */}
                                 {proposalType === 'contrat' && (
                                     <div>
                                         <label className="block text-sm font-medium text-neutral-700 mb-2">
-                                            Catégorie <span className="text-red-500">*</span>
+                                            Catégorie de contrat <span className="text-red-500">*</span>
                                         </label>
                                         <select
-                                            value={selectedCategory}
-                                            onChange={(e) => setSelectedCategory(e.target.value)}
+                                            value={selectedContractCategory}
+                                            onChange={(e) => setSelectedContractCategory(e.target.value)}
                                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
                                             {CONTRACT_CATEGORIES.map(category => (
+                                                <option key={category} value={category}>{category}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Catégorie Produit */}
+                                {proposalType === 'produit' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-neutral-700 mb-2">
+                                            Type de produit <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            value={selectedProductCategory}
+                                            onChange={(e) => setSelectedProductCategory(e.target.value)}
+                                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            {PRODUCT_CATEGORIES.map(category => (
                                                 <option key={category} value={category}>{category}</option>
                                             ))}
                                         </select>
@@ -184,7 +213,8 @@ export default function CreateProposal({
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-semibold text-neutral-900">{proposal.itemName}</span>
-                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 capitalize">
+                                                    <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${proposal.type === 'contrat' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                                                        }`}>
                                                         {proposal.type}
                                                     </span>
                                                 </div>
