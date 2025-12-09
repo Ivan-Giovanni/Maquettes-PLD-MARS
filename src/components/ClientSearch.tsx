@@ -8,50 +8,52 @@ interface ClientSearchProps {
     onSelectClient: (client: Client) => void;
 }
 
+type SearchType = 'id' | 'name' | 'person';
+
 export default function ClientSearch({ clients, persons, onSelectClient }: ClientSearchProps) {
-    const [searchCriteria, setSearchCriteria] = useState({
-        clientId: '',
-        clientName: '',
-        personName: '',
-        city: ''
-    });
+    const [searchType, setSearchType] = useState<SearchType>('id');
+    const [searchValue, setSearchValue] = useState('');
+
+    // City filter state
+    const [isCityFilterEnabled, setIsCityFilterEnabled] = useState(false);
+    const [cityValue, setCityValue] = useState('');
 
     const [searchResults, setSearchResults] = useState<Client[]>([]);
     const [hasSearched, setHasSearched] = useState(false);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
     const handleSearch = () => {
+        const query = searchValue.toLowerCase().trim();
+        const cityQuery = cityValue.toLowerCase().trim();
+
         const results = clients.filter(client => {
-            // Basic client criteria
-            const matchId = !searchCriteria.clientId || client.id.toLowerCase().includes(searchCriteria.clientId.toLowerCase());
-            const matchName = !searchCriteria.clientName || client.name.toLowerCase().includes(searchCriteria.clientName.toLowerCase());
-            const matchCity = !searchCriteria.city || client.address.city.toLowerCase().includes(searchCriteria.city.toLowerCase());
+            // 1. Primary Filter based on Search Type
+            let matchesPrimary = false;
 
-            // Person criteria: find if ANY person associated with this client matches the name
-            // Note: In a real app we'd have a clearer link between Client and Person. 
-            // For this mock, let's assume ALL persons in `persons` are searchable, and we find their Client?
-            // Or we filter clients that have *some* relation. 
-            // The current data model links Persons to Client via App state, but here we just have props.
-            // Let's assume for this mock we just check if ANY person in the provided `persons` list matches name AND is in same city?
-            // Actually, `persons` passed here should ideally be "All persons associated with these clients".
-            // Let's keep it simple: if personName provided, we skip for now as we don't have easy Client->Person link in this component's props without complex filtering.
-            // Wait, `App.tsx` has `clientPersons` state.
-            // I'll adhere strictly to the request: "rechercher... par Nom personne".
-
-            let matchPerson = true;
-            if (searchCriteria.personName) {
-                // This is tricky without a direct mapping in props. 
-                // I'll assume for this prototype that we just search clients for now, 
-                // OR simply return all suitable clients if they match the other criteria, 
-                // ignoring personName for the mock logic safety unless I can link them.
-                // Let's just match Client Name for simplicity if strictly mock.
-                // OR better: search `persons` for name match, get their IDs, but we don't have Person->Client ID in mock data easily visible here?
-                // Ah, mockSubscriptions link Client to Contract, mockPersons doesn't strictly have clientId field.
-                // I will ignore Person Name search logic for this specific mock step to avoid breakage, but keep the input.
-                matchPerson = true;
+            if (!query) {
+                matchesPrimary = true; // If empty, match all (or should we require input? Match all is finer for "browsing")
+            } else {
+                switch (searchType) {
+                    case 'id':
+                        matchesPrimary = client.id.toLowerCase().includes(query);
+                        break;
+                    case 'name':
+                        matchesPrimary = client.name.toLowerCase().includes(query);
+                        break;
+                    case 'person':
+                        // Placeholder logic for Person Search
+                        matchesPrimary = client.name.toLowerCase().includes(query);
+                        break;
+                }
             }
 
-            return matchId && matchName && matchCity && matchPerson;
+            // 2. City Filter (Optional)
+            let matchesCity = true;
+            if (isCityFilterEnabled && cityQuery) {
+                matchesCity = client.address.city.toLowerCase().includes(cityQuery);
+            }
+
+            return matchesPrimary && matchesCity;
         });
 
         setSearchResults(results);
@@ -60,11 +62,16 @@ export default function ClientSearch({ clients, persons, onSelectClient }: Clien
     };
 
     const getClientPersons = (clientId: string) => {
-        // Helper to get person names for display. 
-        // In this mock setup, we might just show "Jean Dupont, Marie Martin" static for demo
-        // or try to find them if possible. Let's return a placeholder for the mock aesthetic if real data missing.
         if (clientId === 'CLI-001') return 'Jean Dupont, Marie Martin';
-        return '-'; // Placeholder
+        return '-';
+    };
+
+    const getPlaceholder = () => {
+        switch (searchType) {
+            case 'id': return 'Ex: CLI-001';
+            case 'name': return 'Ex: Acme Corp';
+            case 'person': return 'Ex: Dupont';
+        }
     };
 
     return (
@@ -78,57 +85,98 @@ export default function ClientSearch({ clients, persons, onSelectClient }: Clien
                         Recherche Client
                     </h1>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-1">Numéro Client</label>
-                            <input
-                                type="text"
-                                value={searchCriteria.clientId}
-                                onChange={e => setSearchCriteria({ ...searchCriteria, clientId: e.target.value })}
-                                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Ex: CLI-001"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-1">Dénomination</label>
-                            <input
-                                type="text"
-                                value={searchCriteria.clientName}
-                                onChange={e => setSearchCriteria({ ...searchCriteria, clientName: e.target.value })}
-                                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Ex: Acme Corp"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-1">Nom Personne</label>
-                            <input
-                                type="text"
-                                value={searchCriteria.personName}
-                                onChange={e => setSearchCriteria({ ...searchCriteria, personName: e.target.value })}
-                                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Ex: Dupont"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-700 mb-1">Ville</label>
-                            <input
-                                type="text"
-                                value={searchCriteria.city}
-                                onChange={e => setSearchCriteria({ ...searchCriteria, city: e.target.value })}
-                                className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Ex: Paris"
-                            />
-                        </div>
-                    </div>
+                    <div className="space-y-6">
 
-                    <div className="flex justify-end">
-                        <button
-                            onClick={handleSearch}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                        >
-                            <Search className="w-4 h-4" />
-                            Rechercher
-                        </button>
+                        {/* Radio Buttons for Search Type */}
+                        <div className="flex flex-col sm:flex-row gap-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="searchType"
+                                    value="id"
+                                    checked={searchType === 'id'}
+                                    onChange={() => setSearchType('id')}
+                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300"
+                                />
+                                <span className="text-neutral-700 font-medium">Numéro Client</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="searchType"
+                                    value="name"
+                                    checked={searchType === 'name'}
+                                    onChange={() => setSearchType('name')}
+                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300"
+                                />
+                                <span className="text-neutral-700 font-medium">Dénomination</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="searchType"
+                                    value="person"
+                                    checked={searchType === 'person'}
+                                    onChange={() => setSearchType('person')}
+                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300"
+                                />
+                                <span className="text-neutral-700 font-medium">Nom Personne</span>
+                            </label>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                            {/* Main Search Input */}
+                            <div className="w-full">
+                                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                                    {searchType === 'id' ? 'Numéro Client' :
+                                        searchType === 'name' ? 'Dénomination' : 'Nom de la personne'}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={searchValue}
+                                    onChange={e => setSearchValue(e.target.value)}
+                                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    placeholder={getPlaceholder()}
+                                />
+                            </div>
+
+                            {/* Optional City Filter */}
+                            <div className="w-full bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+                                <div className="flex items-center mb-2">
+                                    <input
+                                        type="checkbox"
+                                        id="cityFilter"
+                                        checked={isCityFilterEnabled}
+                                        onChange={e => setIsCityFilterEnabled(e.target.checked)}
+                                        className="w-4 h-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-500"
+                                    />
+                                    <label htmlFor="cityFilter" className="ml-2 text-sm font-medium text-neutral-700 cursor-pointer">
+                                        Filtrer par ville
+                                    </label>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={cityValue}
+                                    onChange={e => setCityValue(e.target.value)}
+                                    disabled={!isCityFilterEnabled}
+                                    className={`w-full px-3 py-2 border rounded-md text-sm outline-none transition-all ${isCityFilterEnabled
+                                            ? 'bg-white border-neutral-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                                            : 'bg-neutral-100 border-neutral-200 text-neutral-400 cursor-not-allowed'
+                                        }`}
+                                    placeholder="Ex: Paris"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end pt-2">
+                            <button
+                                onClick={handleSearch}
+                                className="px-8 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium shadow-sm hover:shadow-md"
+                            >
+                                <Search className="w-4 h-4" />
+                                Rechercher
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -143,7 +191,7 @@ export default function ClientSearch({ clients, persons, onSelectClient }: Clien
                                     const client = searchResults.find(c => c.id === selectedClientId);
                                     if (client) onSelectClient(client);
                                 }}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                             >
                                 Consulter le dossier client
                             </button>
@@ -153,7 +201,7 @@ export default function ClientSearch({ clients, persons, onSelectClient }: Clien
                             <table className="w-full">
                                 <thead className="bg-white border-b border-neutral-200">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Sélection</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider w-16">Sélection</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Dénomination</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Adresse</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Personnes</th>
@@ -166,21 +214,23 @@ export default function ClientSearch({ clients, persons, onSelectClient }: Clien
                                             className={`hover:bg-blue-50 transition-colors cursor-pointer ${selectedClientId === client.id ? 'bg-blue-50' : ''}`}
                                             onClick={() => setSelectedClientId(client.id)}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 <input
                                                     type="radio"
                                                     name="clientSelect"
                                                     checked={selectedClientId === client.id}
                                                     onChange={() => setSelectedClientId(client.id)}
-                                                    className="h-4 w-4 text-blue-600 border-neutral-300 focus:ring-blue-500"
+                                                    className="h-4 w-4 text-blue-600 border-neutral-300 focus:ring-blue-500 cursor-pointer"
                                                 />
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center">
                                                     <Building2 className="flex-shrink-0 h-5 w-5 text-neutral-400 mr-3" />
-                                                    <div className="text-sm font-medium text-neutral-900">{client.name}</div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-neutral-900">{client.name}</div>
+                                                        <div className="text-xs text-neutral-500">{client.id}</div>
+                                                    </div>
                                                 </div>
-                                                <div className="text-xs text-neutral-500 ml-8">{client.id}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm text-neutral-900">{client.address.street}</div>
@@ -196,8 +246,9 @@ export default function ClientSearch({ clients, persons, onSelectClient }: Clien
                                     ))}
                                     {searchResults.length === 0 && (
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">
-                                                Aucun résultat trouvé pour ces critères.
+                                            <td colSpan={4} className="px-6 py-12 text-center text-neutral-500">
+                                                <Search className="w-12 h-12 text-neutral-200 mx-auto mb-3" />
+                                                <p>Aucun résultat trouvé pour ces critères.</p>
                                             </td>
                                         </tr>
                                     )}
