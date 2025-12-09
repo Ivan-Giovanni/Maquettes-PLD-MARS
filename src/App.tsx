@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ClientsList from './components/ClientsList';
+import Client360 from './components/Client360';
 import ClientDetails from './components/ClientDetails';
 import PersonDetails from './components/PersonDetails';
 import DomainSubscriptions from './components/subscriptions/DomainSubscriptions';
@@ -137,11 +137,11 @@ const initialAllPersons: Person[] = [
   }
 ];
 
-type View = 'clients-list' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact';
+type View = 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<View>('clients-list');
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [currentView, setCurrentView] = useState<View>('client-360');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(mockClient);
   const [clientPersons, setClientPersons] = useState<Person[]>(mockPersons);
   const [allPersons, setAllPersons] = useState<Person[]>(initialAllPersons);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
@@ -198,7 +198,7 @@ export default function App() {
   };
 
   const handleBackToClientFromSubscriptions = () => {
-    setCurrentView('clients-list');
+    setCurrentView('client-360');
     setSelectedDomainId(null);
     setSelectedSubscription(null);
   };
@@ -267,7 +267,7 @@ export default function App() {
   };
 
   const handleBackToClientFromContacts = () => {
-    setCurrentView('clients-list');
+    setCurrentView('client-360');
   };
 
   const handleCreateContact = () => {
@@ -286,21 +286,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {currentView === 'clients-list' && (
-        <ClientsList
-          clients={mockClients}
-          onSelectClient={client => {
-            setSelectedClient(client);
-            setCurrentView('client-details');
-          }}
-          onViewSubscriptions={client => {
-            setSelectedClient(client);
-            setCurrentView('domain-subscriptions');
-          }}
-          onViewContacts={client => {
-            setSelectedClient(client);
-            setCurrentView('contacts-list');
-          }}
+      {currentView === 'client-360' && selectedClient && (
+        <Client360
+          client={selectedClient}
+          onViewDetails={() => setCurrentView('client-details')}
+          onViewSubscriptions={handleViewSubscriptions}
+          onViewContacts={handleViewContacts}
         />
       )}
 
@@ -309,7 +300,7 @@ export default function App() {
           client={selectedClient}
           persons={clientPersons}
           allPersons={allPersons}
-          onBack={() => setCurrentView('clients-list')}
+          onBack={() => setCurrentView('client-360')}
           onViewPerson={handleViewPerson}
           onCreatePerson={handleCreateAndViewPerson}
           onAddPerson={handleAddPerson}
