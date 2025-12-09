@@ -7,6 +7,7 @@ import CreateSubscription from './components/subscriptions/CreateSubscription';
 import SubscriptionDetails from './components/subscriptions/SubscriptionDetails';
 import ContactsList from './components/contacts/ContactsList';
 import CreateContact from './components/contacts/CreateContact';
+import ContactDetails from './components/contacts/ContactDetails';
 import { Person, Client } from './types';
 import { Subscription } from './types/subscription';
 import { Contact } from './types/contact';
@@ -137,7 +138,7 @@ const initialAllPersons: Person[] = [
   }
 ];
 
-type View = 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact';
+type View = 'client-360' | 'client-details' | 'person-details' | 'domain-subscriptions' | 'create-subscription' | 'subscription-details' | 'contacts-list' | 'create-contact' | 'contact-details';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('client-360');
@@ -270,6 +271,11 @@ export default function App() {
     setCurrentView('client-360');
   };
 
+  const handleBackToContactsList = () => {
+    setCurrentView('contacts-list');
+    setSelectedContact(null);
+  };
+
   const handleCreateContact = () => {
     setCurrentView('create-contact');
   };
@@ -281,7 +287,14 @@ export default function App() {
 
   const handleViewContact = (contact: Contact) => {
     setSelectedContact(contact);
-    // TODO: Navigate to contact details view when implemented
+    setCurrentView('contact-details');
+  };
+
+  const handleUpdateContact = (updatedContact: Contact) => {
+    setContacts(prev =>
+      prev.map(c => (c.id === updatedContact.id ? updatedContact : c))
+    );
+    setSelectedContact(updatedContact);
   };
 
   return (
@@ -368,8 +381,18 @@ export default function App() {
           client={selectedClient}
           persons={clientPersons}
           agents={mockAgents}
-          onBack={handleBackToClientFromContacts}
+          onBack={handleBackToContactsList}
           onCreate={handleSaveContact}
+        />
+      )}
+
+      {currentView === 'contact-details' && selectedContact && selectedClient && (
+        <ContactDetails
+          contact={selectedContact}
+          persons={clientPersons}
+          agents={mockAgents}
+          onBack={handleBackToContactsList}
+          onUpdate={handleUpdateContact}
         />
       )}
     </div>
