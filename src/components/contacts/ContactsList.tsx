@@ -87,6 +87,8 @@ export default function ContactsList({
     }
   };
 
+  const sortedContacts = [...contacts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Header */}
@@ -127,13 +129,13 @@ export default function ContactsList({
         </div>
 
         {/* Contacts List */}
-        {contacts.length === 0 ? (
+        {sortedContacts.length === 0 ? (
           <div className="bg-white rounded-lg border border-neutral-200 p-12 text-center">
             <p className="text-neutral-500">Aucun contact pour ce client.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {contacts.map(contact => (
+            {sortedContacts.map(contact => (
               <div
                 key={contact.id}
                 className="bg-white rounded-lg border border-neutral-200 p-6 hover:shadow-md transition-shadow"
@@ -149,7 +151,7 @@ export default function ContactsList({
                       >
                         {getStatusLabel(contact.status)}
                       </span>
-                      <span className="px-2 py-1 bg-neutral-100 text-neutral-700 rounded-full text-xs">
+                      <span className="px-3 py-1 bg-neutral-100 text-neutral-900 border border-neutral-200 rounded-full text-sm font-medium uppercase tracking-wide">
                         {getContactTypeLabel(contact.type)}
                       </span>
                     </div>

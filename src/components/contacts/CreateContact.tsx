@@ -9,6 +9,7 @@ interface CreateContactProps {
   agents: Agent[];
   initialType?: ContactType;
   forceType?: boolean;
+  originContact?: Contact;
   onBack: () => void;
   onCreate: (contact: Contact) => void;
 }
@@ -19,6 +20,7 @@ export default function CreateContact({
   agents,
   initialType = 'spontane',
   forceType = false,
+  originContact,
   onBack,
   onCreate
 }: CreateContactProps) {
@@ -66,6 +68,8 @@ export default function CreateContact({
       personIds: selectedPersonIds,
       agentId: selectedAgentId,
       agentName: selectedAgent.name,
+      originContactId: originContact?.id,
+      originContactMotif: originContact?.motif,
       createdDate: new Date().toISOString(),
       createdBy: selectedAgent.name
     };
@@ -96,6 +100,18 @@ export default function CreateContact({
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-neutral-200 p-8">
+
+          {/* Origin Contact Display */}
+          {originContact && (
+            <div className="mb-8 p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3">
+              <ArrowLeft className="w-5 h-5 text-blue-600" />
+              <div>
+                <p className="text-sm text-blue-800 font-medium">Suite à l'échange :</p>
+                <p className="text-blue-900 font-semibold">{originContact.motif} <span className="text-blue-600 font-normal">- {new Date(originContact.date).toLocaleDateString()}</span></p>
+              </div>
+            </div>
+          )}
+
           {/* Type de contact */}
           <div className="mb-8">
             <h2 className="text-neutral-900 mb-4">Type de contact</h2>
@@ -105,10 +121,10 @@ export default function CreateContact({
                 onClick={() => !forceType && setType('spontane')}
                 disabled={forceType}
                 className={`p-4 border-2 rounded-lg transition-all ${type === 'spontane'
-                    ? 'border-blue-600 bg-blue-50'
-                    : forceType
-                      ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
-                      : 'border-neutral-200 hover:border-neutral-300'
+                  ? 'border-blue-600 bg-blue-50'
+                  : forceType
+                    ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
+                    : 'border-neutral-200 hover:border-neutral-300'
                   }`}
               >
                 <div className="text-center">
@@ -121,10 +137,10 @@ export default function CreateContact({
                 onClick={() => !forceType && setType('commercial')}
                 disabled={forceType}
                 className={`p-4 border-2 rounded-lg transition-all ${type === 'commercial'
-                    ? 'border-blue-600 bg-blue-50'
-                    : forceType
-                      ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
-                      : 'border-neutral-200 hover:border-neutral-300'
+                  ? 'border-blue-600 bg-blue-50'
+                  : forceType
+                    ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
+                    : 'border-neutral-200 hover:border-neutral-300'
                   }`}
               >
                 <div className="text-center">
@@ -134,18 +150,16 @@ export default function CreateContact({
               </button>
               <button
                 type="button"
-                onClick={() => !forceType && setType('entretien')}
-                disabled={forceType}
+                onClick={() => { }}
+                disabled={true}
                 className={`p-4 border-2 rounded-lg transition-all ${type === 'entretien'
-                    ? 'border-blue-600 bg-blue-50'
-                    : forceType
-                      ? 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed'
-                      : 'border-neutral-200 hover:border-neutral-300'
+                  ? 'border-blue-600 bg-blue-50'
+                  : 'border-neutral-100 bg-neutral-50 opacity-50 cursor-not-allowed text-neutral-400'
                   }`}
               >
                 <div className="text-center">
-                  <p className="text-neutral-900">Entretien</p>
-                  <p className="text-neutral-500 text-sm">Rendez-vous planifié</p>
+                  <p className={type === 'entretien' ? 'text-neutral-900' : 'text-neutral-400'}>Entretien</p>
+                  <p className="text-neutral-400 text-sm">Via "Planifier" uniquement</p>
                 </div>
               </button>
             </div>
@@ -159,8 +173,8 @@ export default function CreateContact({
                 type="button"
                 onClick={() => setModality('sur_place')}
                 className={`p-4 border-2 rounded-lg transition-all ${modality === 'sur_place'
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
+                  ? 'border-blue-600 bg-blue-50'
+                  : 'border-neutral-200 hover:border-neutral-300'
                   }`}
               >
                 <p className="text-neutral-900 text-center">Sur place</p>
@@ -169,8 +183,8 @@ export default function CreateContact({
                 type="button"
                 onClick={() => setModality('telephone')}
                 className={`p-4 border-2 rounded-lg transition-all ${modality === 'telephone'
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
+                  ? 'border-blue-600 bg-blue-50'
+                  : 'border-neutral-200 hover:border-neutral-300'
                   }`}
               >
                 <p className="text-neutral-900 text-center">Téléphone</p>
@@ -179,8 +193,8 @@ export default function CreateContact({
                 type="button"
                 onClick={() => setModality('mail')}
                 className={`p-4 border-2 rounded-lg transition-all ${modality === 'mail'
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-neutral-200 hover:border-neutral-300'
+                  ? 'border-blue-600 bg-blue-50'
+                  : 'border-neutral-200 hover:border-neutral-300'
                   }`}
               >
                 <p className="text-neutral-900 text-center">Mail</p>
@@ -262,9 +276,22 @@ export default function CreateContact({
 
           {/* Sélection de l'agent */}
           <div className="mb-8">
-            <label className="block text-neutral-900 mb-2">
-              Agent <span className="text-red-500">*</span>
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-neutral-900">
+                Agent <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (agents.length > 0) {
+                    setSelectedAgentId(agents[0].id);
+                  }
+                }}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Me l'assigner
+              </button>
+            </div>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
               <select

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, X, Calendar, User, Phone, Mail, MapPin, AlertCircle, CheckCircle, Info } from 'lucide-react';
-import { Contact, ContactModality, ContactStatus } from '../../types/contact';
-import { Person, Agent } from '../../types';
+import { ArrowLeft, Save, X, Calendar, User, Phone, Mail, MapPin, AlertCircle, CheckCircle, Info, Eye } from 'lucide-react';
+import { Contact, ContactModality, ContactStatus, Agent } from '../../types/contact';
+import { Person } from '../../types';
 
 interface ContactDetailsProps {
   contact: Contact;
@@ -98,23 +98,7 @@ export default function ContactDetails({
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Informations */}
-        <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-            <Info className="w-5 h-5 text-blue-600" />
-            Informations
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-500 mb-1">Motif</label>
-              <p className="text-neutral-900">{contact.motif}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-500 mb-1">Description</label>
-              <p className="text-neutral-900 whitespace-pre-wrap">{contact.description}</p>
-            </div>
-          </div>
-        </div>
+        {/* Informations block removed as requested - redundant with bottom section */}
 
         {/* Propositions faites (if realised) */}
         {contact.status === 'realise' && contact.proposals && contact.proposals.length > 0 && (
@@ -138,6 +122,9 @@ export default function ContactDetails({
                       <p className="text-sm text-neutral-600">{proposal.annotation}</p>
                     )}
                   </div>
+                  <button className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Consulter les détails">
+                    <Eye className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -259,6 +246,15 @@ export default function ContactDetails({
             <section className="space-y-4">
               <h3 className="text-lg font-medium text-neutral-900 border-b border-neutral-100 pb-2">Détails de l'échange</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {contact.originContactId && (
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Contact d'origine</label>
+                    <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-3 py-2 rounded-lg w-fit">
+                      <ArrowLeft className="w-4 h-4" />
+                      <span className="text-sm font-medium">Référence: {contact.originContactId}</span>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Date</label>
                   {isEditing && isEntretien ? (

@@ -32,6 +32,8 @@ export interface Contact {
   closedDate?: string;
   comment?: string;
   proposals?: Proposal[];
+  originContactId?: string;
+  originContactMotif?: string;
 }
 
 export interface Agent {

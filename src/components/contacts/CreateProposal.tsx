@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, FileText, Check, Plus, Trash2, ShoppingBag, FileBadge } from 'lucide-react';
+import { ArrowLeft, FileText, Check, Plus, Trash2, ShoppingBag, FileBadge, Eye } from 'lucide-react';
 import { Client } from '../../types';
 import { Proposal, ProposalType } from '../../types/contact';
 
@@ -9,19 +9,20 @@ interface CreateProposalProps {
     onCreate: (proposals: Proposal[]) => void;
 }
 
-const CONTRACT_CATEGORIES = [
-    'Assurance',
-    'Téléphonie mobile',
-    'Santé',
-    'Surveillance'
+const CONTRACT_OFFERS = [
+    'Contrat Santé Plus',
+    'Assurance Habitation Pivot',
+    'Protection Juridique Intégrale',
+    'Garantie Accidents de la Vie',
+    'Assurance Auto Tous Risques'
 ];
 
-const PRODUCT_CATEGORIES = [
+const PRODUCT_OFFERS = [
     'Livret A',
-    'Assurance Vie',
-    'PEL',
-    'PER',
-    'Compte Titres'
+    'PEL (Plan Epargne Logement)',
+    'Assurance Vie Multi-support',
+    'PER (Plan Epargne Retraite)',
+    'Compte Titres Ordinaire'
 ];
 
 export default function CreateProposal({
@@ -33,12 +34,12 @@ export default function CreateProposal({
 
     // Form State
     const [proposalType, setProposalType] = useState<ProposalType>('contrat');
-    const [selectedContractCategory, setSelectedContractCategory] = useState(CONTRACT_CATEGORIES[0]);
-    const [selectedProductCategory, setSelectedProductCategory] = useState(PRODUCT_CATEGORIES[0]);
+    const [selectedContractOffer, setSelectedContractOffer] = useState(CONTRACT_OFFERS[0]);
+    const [selectedProductOffer, setSelectedProductOffer] = useState(PRODUCT_OFFERS[0]);
     const [description, setDescription] = useState('');
 
     const handleAddProposal = () => {
-        const itemName = proposalType === 'contrat' ? selectedContractCategory : selectedProductCategory;
+        const itemName = proposalType === 'contrat' ? selectedContractOffer : selectedProductOffer;
 
         const newProposal: Proposal = {
             id: `PROP-${Date.now()}`,
@@ -105,8 +106,8 @@ export default function CreateProposal({
                                             type="button"
                                             onClick={() => setProposalType('contrat')}
                                             className={`flex-1 p-3 border rounded-lg flex items-center justify-center gap-2 transition-all ${proposalType === 'contrat'
-                                                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                                    : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
                                                 }`}
                                         >
                                             <FileBadge className="w-4 h-4" />
@@ -116,8 +117,8 @@ export default function CreateProposal({
                                             type="button"
                                             onClick={() => setProposalType('produit')}
                                             className={`flex-1 p-3 border rounded-lg flex items-center justify-center gap-2 transition-all ${proposalType === 'produit'
-                                                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                                    : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
                                                 }`}
                                         >
                                             <ShoppingBag className="w-4 h-4" />
@@ -130,17 +131,19 @@ export default function CreateProposal({
                                 {proposalType === 'contrat' && (
                                     <div>
                                         <label className="block text-sm font-medium text-neutral-700 mb-2">
-                                            Catégorie de contrat <span className="text-red-500">*</span>
+                                            Offre de contrat <span className="text-red-500">*</span>
                                         </label>
                                         <select
-                                            value={selectedContractCategory}
-                                            onChange={(e) => setSelectedContractCategory(e.target.value)}
+                                            value={selectedContractOffer}
+                                            onChange={(e) => setSelectedContractOffer(e.target.value)}
                                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            {CONTRACT_CATEGORIES.map(category => (
-                                                <option key={category} value={category}>{category}</option>
+                                            {CONTRACT_OFFERS.map(offer => (
+                                                <option key={offer} value={offer}>{offer}</option>
                                             ))}
                                         </select>
+
+
                                     </div>
                                 )}
 
@@ -148,20 +151,27 @@ export default function CreateProposal({
                                 {proposalType === 'produit' && (
                                     <div>
                                         <label className="block text-sm font-medium text-neutral-700 mb-2">
-                                            Type de produit <span className="text-red-500">*</span>
+                                            Offre de produit <span className="text-red-500">*</span>
                                         </label>
                                         <select
-                                            value={selectedProductCategory}
-                                            onChange={(e) => setSelectedProductCategory(e.target.value)}
+                                            value={selectedProductOffer}
+                                            onChange={(e) => setSelectedProductOffer(e.target.value)}
                                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            {PRODUCT_CATEGORIES.map(category => (
-                                                <option key={category} value={category}>{category}</option>
+                                            {PRODUCT_OFFERS.map(offer => (
+                                                <option key={offer} value={offer}>{offer}</option>
                                             ))}
                                         </select>
                                     </div>
                                 )}
-
+                                <button
+                                    onClick={handleAddProposal}
+                                    type="button"
+                                    className="w-full py-2.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium flex items-center justify-center gap-2"
+                                >
+                                    <Eye className="w-4 h-4" />
+                                    Voir détails de l'offre
+                                </button>
                                 {/* Description */}
                                 <div>
                                     <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -238,8 +248,8 @@ export default function CreateProposal({
                                     onClick={handleSubmit}
                                     disabled={addedProposals.length === 0}
                                     className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${addedProposals.length === 0
-                                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                                            : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
+                                        ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                                        : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
                                         }`}
                                 >
                                     <Check className="w-5 h-5" />

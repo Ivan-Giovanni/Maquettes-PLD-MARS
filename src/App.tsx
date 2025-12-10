@@ -197,6 +197,7 @@ export default function App() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [createContactInitialType, setCreateContactInitialType] = useState<ContactType | undefined>(undefined);
   const [createContactForceType, setCreateContactForceType] = useState(false);
+  const [createContactOrigin, setCreateContactOrigin] = useState<Contact | undefined>(undefined);
 
   const handleSelectClient = (client: Client) => {
     setSelectedClient(client);
@@ -327,12 +328,14 @@ export default function App() {
   const handleCreateContact = () => {
     setCreateContactInitialType('spontane'); // Default
     setCreateContactForceType(false);
+    setCreateContactOrigin(undefined);
     setCurrentView('create-contact');
   };
 
-  const handlePlanInterview = () => {
+  const handlePlanInterview = (originContact?: Contact) => {
     setCreateContactInitialType('entretien');
     setCreateContactForceType(true);
+    setCreateContactOrigin(originContact);
     setCurrentView('create-contact');
   };
 
@@ -480,6 +483,7 @@ export default function App() {
           agents={mockAgents}
           initialType={createContactInitialType}
           forceType={createContactForceType}
+          originContact={createContactOrigin}
           onBack={handleBackToContactsList}
           onCreate={handleSaveContact}
         />
@@ -492,7 +496,7 @@ export default function App() {
           agents={mockAgents}
           onBack={handleBackToContactsList}
           onUpdate={handleUpdateContact}
-          onPlanInterview={handlePlanInterview}
+          onPlanInterview={() => handlePlanInterview(selectedContact)}
           onRealizeInterview={handleRealizeInterview}
         />
       )}

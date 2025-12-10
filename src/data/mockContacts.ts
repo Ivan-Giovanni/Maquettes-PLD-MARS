@@ -59,7 +59,8 @@ export const mockContacts: Contact[] = [
     agentId: 'AGT-002',
     agentName: 'Jean Moreau',
     createdDate: '2024-12-01T09:00:00',
-    createdBy: 'Jean Moreau'
+    createdBy: 'Jean Moreau',
+    originContactId: 'CNT-003'
   },
   {
     id: 'CNT-003',
